@@ -11,6 +11,9 @@ KIND := ../../hack/tools/bin/kind
 docker-build: ## Build docker image with the manager.
 	docker build --load --build-arg BUILDOS=linux --build-arg TARGETARCH=amd64 -t $(CONTROLLER_IMG):latest .
 
+.PHONY: docker-buildx
+docker-buildx: ## docker build for multiple arch and push to docker hub
+	docker buildx build --push --platform linux/amd64,linux/arm64 -t $(CONTROLLER_IMG):latest .
 
 .PHONY: load-image
 load-image: docker-build $(KIND)
