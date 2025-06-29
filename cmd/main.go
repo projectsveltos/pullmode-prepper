@@ -485,4 +485,20 @@ rules:
   verbs:
   - get
   - update
+- apiGroups:
+  - lib.projectsveltos.io
+  resources:
+  - classifiers
+  verbs:
+  - get
+  - list
+- apiGroups:
+  - lib.projectsveltos.io
+  resources:
+  - classifierreports
+  verbs:
+  - create
+  - get
+  - list
+  - update
 `
