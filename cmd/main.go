@@ -593,4 +593,5 @@ rules:
   verbs:
   - get
   - list
+  - watch
 `
