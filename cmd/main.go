@@ -578,6 +578,7 @@ rules:
   - get
   - list
   - update
+  - watch
 `
 
 var clusterRole = `apiVersion: rbac.authorization.k8s.io/v1
