@@ -120,9 +120,21 @@ func createClusterResources(ctx context.Context, c client.Client,
 		return err
 	}
 
+	err = createClusterRole(ctx, c, clusterNamespace, clusterName)
+	if err != nil {
+		logger.V(0).Info(fmt.Sprintf("createRole failed: %s", err))
+		return err
+	}
+
 	err = createRoleBinding(ctx, c, clusterNamespace, clusterName)
 	if err != nil {
 		logger.V(0).Info(fmt.Sprintf("createRoleBinding failed: %s", err))
+		return err
+	}
+
+	err = createClusterRoleBinding(ctx, c, clusterNamespace, clusterName)
+	if err != nil {
+		logger.V(0).Info(fmt.Sprintf("createClusterRoleBinding failed: %s", err))
 		return err
 	}
 
@@ -238,6 +250,40 @@ func createRole(ctx context.Context, c client.Client, namespace, name string) er
 	return err
 }
 
+func createClusterRole(ctx context.Context, c client.Client, namespace, name string) error {
+	tmpl, err := template.New(name).Option("missingkey=error").Parse(clusterRole)
+	if err != nil {
+		return err
+	}
+
+	var buffer bytes.Buffer
+
+	if err := tmpl.Execute(&buffer,
+		struct {
+			Namespace, Name string
+		}{
+			Namespace: namespace,
+			Name:      name,
+		}); err != nil {
+		return fmt.Errorf("error executing template: %w", err)
+	}
+	instantiatedClusterRole := buffer.String()
+
+	uClusterRole, err := k8s_utils.GetUnstructured([]byte(instantiatedClusterRole))
+	if err != nil {
+		return err
+	}
+
+	err = c.Create(ctx, uClusterRole)
+	if err != nil {
+		if apierrors.IsAlreadyExists(err) {
+			return nil
+		}
+	}
+
+	return err
+}
+
 func createRoleBinding(ctx context.Context, c client.Client, namespace, name string) error {
 	roleBinding := &rbacv1.RoleBinding{
 		ObjectMeta: metav1.ObjectMeta{
@@ -259,6 +305,37 @@ func createRoleBinding(ctx context.Context, c client.Client, namespace, name str
 	}
 
 	err := c.Create(ctx, roleBinding)
+	if err != nil {
+		if apierrors.IsAlreadyExists(err) {
+			return nil
+		}
+	}
+
+	return nil
+}
+
+func createClusterRoleBinding(ctx context.Context, c client.Client, namespace, name string) error {
+	// This binds serviceAccount with clusterRole. This grants read permissions for
+	// resources like Classifier
+	clusterRoleBinding := &rbacv1.ClusterRoleBinding{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: namespace + "-" + name,
+		},
+		RoleRef: rbacv1.RoleRef{
+			APIGroup: "rbac.authorization.k8s.io",
+			Kind:     "ClusterRole",
+			Name:     namespace + "-" + name,
+		},
+		Subjects: []rbacv1.Subject{
+			{
+				Kind:      "ServiceAccount",
+				Namespace: namespace,
+				Name:      name,
+			},
+		},
+	}
+
+	err := c.Create(ctx, clusterRoleBinding)
 	if err != nil {
 		if apierrors.IsAlreadyExists(err) {
 			return nil
@@ -501,4 +578,18 @@ rules:
   - get
   - list
   - update
+`
+
+var clusterRole = `apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ .Namespace }}-{{ .Name }}
+rules:
+- apiGroups:
+  - lib.projectsveltos.io
+  resources:
+  - classifiers
+  verbs:
+  - get
+  - list
 `
