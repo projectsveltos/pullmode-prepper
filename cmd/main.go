@@ -565,14 +565,8 @@ rules:
 - apiGroups:
   - lib.projectsveltos.io
   resources:
-  - classifiers
-  verbs:
-  - get
-  - list
-- apiGroups:
-  - lib.projectsveltos.io
-  resources:
   - classifierreports
+  - eventreports
   verbs:
   - create
   - get
@@ -590,6 +584,7 @@ rules:
   - lib.projectsveltos.io
   resources:
   - classifiers
+  - eventsources
   verbs:
   - get
   - list
