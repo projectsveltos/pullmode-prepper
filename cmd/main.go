@@ -568,6 +568,7 @@ rules:
   - classifierreports
   - eventreports
   - healthcheckreports
+  - reloaderreports
   verbs:
   - create
   - get
