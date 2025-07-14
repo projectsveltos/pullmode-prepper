@@ -3,8 +3,9 @@ module github/projectsveltos/addon-controller/test/pullmode
 go 1.24.4
 
 require (
+	github.com/go-logr/logr v1.4.3
 	github.com/projectsveltos/addon-controller v0.57.2
-	github.com/projectsveltos/libsveltos v0.57.3-0.20250610073053-bb1c0b4cea43
+	github.com/projectsveltos/libsveltos v0.57.3-0.20250712141454-5bb04ea32759
 	k8s.io/api v0.33.1
 	k8s.io/apimachinery v0.33.1
 	k8s.io/client-go v0.33.1
@@ -20,7 +21,6 @@ require (
 	github.com/evanphx/json-patch/v5 v5.9.11 // indirect
 	github.com/fsnotify/fsnotify v1.8.0 // indirect
 	github.com/fxamacker/cbor/v2 v2.8.0 // indirect
-	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-openapi/jsonpointer v0.21.0 // indirect
 	github.com/go-openapi/jsonreference v0.21.0 // indirect
 	github.com/go-openapi/swag v0.23.0 // indirect
