@@ -578,9 +578,9 @@ rules:
 - apiGroups:
   - lib.projectsveltos.io
   resources:
-  - classifierreports/reports
-  - eventreports/reports
-  - healthcheckreports/reports
+  - classifierreports/status
+  - eventreports/status
+  - healthcheckreports/status
   verbs:
   - get
   - update
