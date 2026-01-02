@@ -575,6 +575,15 @@ rules:
   - list
   - update
   - watch
+- apiGroups:
+  - lib.projectsveltos.io
+  resources:
+  - classifierreports/reports
+  - eventreports/reports
+  - healthcheckreports/reports
+  verbs:
+  - get
+  - update
 `
 
 var clusterRole = `apiVersion: rbac.authorization.k8s.io/v1
