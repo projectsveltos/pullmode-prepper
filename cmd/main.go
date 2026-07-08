@@ -240,6 +240,14 @@ func createRole(ctx context.Context, c client.Client, namespace, name string) er
 		return err
 	}
 
+	// Permissions might change with new releases
+	currentRole := &rbacv1.Role{}
+	err = c.Get(ctx, types.NamespacedName{Namespace: uRole.GetNamespace(), Name: uRole.GetName()}, currentRole)
+	if err == nil {
+		uRole.SetResourceVersion(currentRole.ResourceVersion)
+		return c.Update(ctx, uRole)
+	}
+
 	err = c.Create(ctx, uRole)
 	if err != nil {
 		if apierrors.IsAlreadyExists(err) {
@@ -272,6 +280,14 @@ func createClusterRole(ctx context.Context, c client.Client, namespace, name str
 	uClusterRole, err := k8s_utils.GetUnstructured([]byte(instantiatedClusterRole))
 	if err != nil {
 		return err
+	}
+
+	// Permissions might change with new releases
+	currentClusterRole := &rbacv1.ClusterRole{}
+	err = c.Get(ctx, types.NamespacedName{Name: uClusterRole.GetName()}, currentClusterRole)
+	if err == nil {
+		uClusterRole.SetResourceVersion(currentClusterRole.ResourceVersion)
+		return c.Update(ctx, uClusterRole)
 	}
 
 	err = c.Create(ctx, uClusterRole)
@@ -581,9 +597,11 @@ rules:
   - classifierreports/status
   - eventreports/status
   - healthcheckreports/status
+  - reloaderreports/status
   verbs:
   - get
   - update
+  - patch
 `
 
 var clusterRole = `apiVersion: rbac.authorization.k8s.io/v1
